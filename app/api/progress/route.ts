@@ -10,7 +10,11 @@ export async function POST(request: Request) {
       userId?: string;
     };
 
-    if (!body.roadmapId || !body.milestoneId || typeof body.completed !== "boolean") {
+    if (
+      !body.roadmapId ||
+      !body.milestoneId ||
+      typeof body.completed !== "boolean"
+    ) {
       return NextResponse.json({ error: "Invalid payload." }, { status: 400 });
     }
 
@@ -23,6 +27,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ progress: record }, { status: 200 });
   } catch {
-    return NextResponse.json({ error: "Failed to update progress." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update progress." },
+      { status: 500 },
+    );
   }
 }

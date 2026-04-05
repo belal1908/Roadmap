@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { listPublicRoadmaps, listTrendingRoadmaps } from "@/lib/roadmap-service";
+import {
+  listPublicRoadmaps,
+  listTrendingRoadmaps,
+} from "@/lib/roadmap-service";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
