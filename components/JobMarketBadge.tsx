@@ -27,7 +27,9 @@ export default function JobMarketBadge({ query, active }: Props) {
     let cancelled = false;
 
     const run = async () => {
-      const response = await fetch(`/api/job-demand?query=${encodeURIComponent(query)}`);
+      const response = await fetch(
+        `/api/job-demand?query=${encodeURIComponent(query)}`,
+      );
       if (!response.ok || cancelled) {
         return;
       }
@@ -51,13 +53,18 @@ export default function JobMarketBadge({ query, active }: Props) {
 
   return (
     <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs">
-      <BriefcaseBusiness className="h-3.5 w-3.5 text-cyan-300" aria-hidden="true" />
+      <BriefcaseBusiness
+        className="h-3.5 w-3.5 text-cyan-300"
+        aria-hidden="true"
+      />
       {!data ? (
         <span className="text-slate-300">Checking demand...</span>
       ) : (
         <span className="text-slate-200">
           {formatNumber(data.openRoles)} open roles ·{" "}
-          <strong className={demandColor[data.demand]}>{data.demand} Demand</strong>
+          <strong className={demandColor[data.demand]}>
+            {data.demand} Demand
+          </strong>
         </span>
       )}
     </div>

@@ -53,7 +53,9 @@ export default function SearchBar({
 
       router.push(`/roadmap/${payload.roadmap.slug}`);
     } catch {
-      setError("We could not generate a roadmap right now. Try again in a moment.");
+      setError(
+        "We could not generate a roadmap right now. Try again in a moment.",
+      );
     } finally {
       setLoading(false);
     }
@@ -83,7 +85,11 @@ export default function SearchBar({
           disabled={loading}
           className="inline-flex h-9 items-center rounded-xl bg-cyan-500 px-4 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : "Generate"}
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          ) : (
+            "Generate"
+          )}
         </button>
       </div>
       {error ? <p className="text-sm text-rose-300">{error}</p> : null}
