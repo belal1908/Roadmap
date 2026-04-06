@@ -16,13 +16,14 @@ function makeDemoRoadmap(topic: string, category: string): Roadmap {
           {
             id: "milestone_1_1",
             title: `Understand ${topic} fundamentals`,
-            description: "Build core concepts and vocabulary to avoid blind trial-and-error.",
+            description:
+              "Build core concepts and vocabulary to avoid blind trial-and-error.",
             skills: ["Terminology", "Core concepts", "Learning strategy"],
             tools: ["Notion", "YouTube", "Spaced repetition"],
             resources: [
               {
                 type: "course",
-                title: `${topic} for Beginners",
+                title: `${topic} for Beginners`,
                 platform: "Coursera",
               },
             ],
@@ -56,7 +57,8 @@ function makeDemoRoadmap(topic: string, category: string): Roadmap {
           {
             id: "milestone_2_1",
             title: `Build a portfolio-grade ${topic} project`,
-            description: "Create one substantial artifact you can publish or present.",
+            description:
+              "Create one substantial artifact you can publish or present.",
             skills: ["Project planning", "Delivery", "Documentation"],
             tools: ["GitHub", "Canva"],
             resources: [
@@ -80,7 +82,8 @@ function makeDemoRoadmap(topic: string, category: string): Roadmap {
           {
             id: "milestone_3_1",
             title: `Position your ${topic} skills for opportunities`,
-            description: "Translate your capabilities into market-relevant language.",
+            description:
+              "Translate your capabilities into market-relevant language.",
             skills: ["Personal branding", "Interview readiness", "Networking"],
             tools: ["LinkedIn", "Resume builder"],
             resources: [
@@ -147,7 +150,11 @@ export function createFallbackRoadmap(query: string): Roadmap {
 export function inferCategory(query: string): string {
   const value = query.toLowerCase();
 
-  if (/(engineer|developer|data|ai|cloud|devops|frontend|backend|programming)/.test(value)) {
+  if (
+    /(engineer|developer|data|ai|cloud|devops|frontend|backend|programming)/.test(
+      value,
+    )
+  ) {
     return "Tech";
   }
 
