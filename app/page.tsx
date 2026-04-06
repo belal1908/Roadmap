@@ -51,6 +51,13 @@ export default function Home() {
             </p>
             <div className="mt-6 max-w-2xl">
               <SearchBar />
+              <div className="mt-3 text-center text-sm text-slate-400">or</div>
+              <Link
+                href="/onboarding"
+                className="mt-3 inline-flex w-full rounded-xl border border-emerald-500/60 bg-emerald-500/10 py-3 justify-center text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/20"
+              >
+                Get Personalized Recommendations →
+              </Link>
             </div>
             <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-400">
               <span className="rounded-full border border-slate-700 px-2 py-1">
