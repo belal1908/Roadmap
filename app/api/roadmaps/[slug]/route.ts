@@ -5,14 +5,14 @@ export async function GET(
   _request: Request,
   { params }: { params: { slug: string } },
 ) {
-  const roadmap = findRoadmap(params.slug);
+  const roadmap = await findRoadmap(params.slug);
 
   if (!roadmap) {
     return NextResponse.json({ error: "Roadmap not found." }, { status: 404 });
   }
 
   const userId = "demo-user";
-  const completedMilestones = getRoadmapProgress(userId, roadmap.id);
+  const completedMilestones = await getRoadmapProgress(userId, roadmap.id);
 
   return NextResponse.json(
     {

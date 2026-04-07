@@ -8,6 +8,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "slug is required." }, { status: 400 });
   }
 
-  markRoadmapViewed(body.slug);
+  await markRoadmapViewed(body.slug);
   return NextResponse.json({ ok: true }, { status: 200 });
 }

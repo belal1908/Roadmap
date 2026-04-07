@@ -70,6 +70,8 @@ export type ProgressRecord = {
   completed_at: string | null;
 };
 
+export type MilestoneStatus = "pending" | "done" | "skip";
+
 export type VideoItem = {
   id: string;
   title: string;

@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import MilestoneCard from "@/components/MilestoneCard";
 import PhaseTracker from "@/components/PhaseTracker";
 import { completionPercentage } from "@/lib/utils";
-import type { RoadmapRecord } from "@/types/roadmap";
+import type { MilestoneStatus, RoadmapRecord } from "@/types/roadmap";
 
 type Props = {
   roadmap: RoadmapRecord;
@@ -19,9 +19,17 @@ export default function RoadmapGraph({
   const [expandedMilestone, setExpandedMilestone] = useState<string | null>(
     null,
   );
-  const [completedMilestones, setCompletedMilestones] = useState<Set<string>>(
-    new Set(initialCompletedMilestones),
-  );
+  const [milestoneStatuses, setMilestoneStatuses] = useState<
+    Record<string, MilestoneStatus>
+  >(() => {
+    const initial: Record<string, MilestoneStatus> = {};
+
+    for (const milestoneId of initialCompletedMilestones) {
+      initial[milestoneId] = "done";
+    }
+
+    return initial;
+  });
 
   const totalMilestones = useMemo(
     () =>
@@ -32,27 +40,50 @@ export default function RoadmapGraph({
     [roadmap.data.phases],
   );
 
-  const completion = completionPercentage(
-    completedMilestones.size,
-    totalMilestones,
+  const doneCount = useMemo(
+    () =>
+      Object.values(milestoneStatuses).filter((status) => status === "done")
+        .length,
+    [milestoneStatuses],
   );
+
+  const completion = completionPercentage(doneCount, totalMilestones);
+
+  async function persistStatus(milestoneId: string, status: MilestoneStatus) {
+    await fetch("/api/progress", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        roadmapId: roadmap.id,
+        milestoneId,
+        completed: status === "done",
+      }),
+    });
+  }
 
   return (
     <div className="space-y-8">
       <PhaseTracker value={completion} />
+      <p className="text-xs text-gray-500">
+        Keyboard shortcuts per topic: <strong>D</strong> done,{" "}
+        <strong>P</strong> pending, <strong>S</strong> skip, <strong>R</strong>{" "}
+        reset.
+      </p>
 
       {roadmap.data.phases.map((phase, phaseIndex) => (
         <section key={phase.id} className="space-y-4">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-wider text-cyan-300">
+              <p className="text-xs uppercase tracking-wider text-blue-600 font-semibold">
                 Phase {phaseIndex + 1} · {phase.level}
               </p>
-              <h3 className="text-2xl font-bold text-slate-100">
+              <h3 className="text-2xl font-bold text-gray-900">
                 {phase.title}
               </h3>
             </div>
-            <span className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs text-slate-300">
+            <span className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-1 text-xs text-gray-600 font-medium">
               {phase.duration}
             </span>
           </div>
@@ -66,25 +97,21 @@ export default function RoadmapGraph({
             {phase.milestones.map((milestone) => (
               <MilestoneCard
                 key={milestone.id}
-                roadmapId={roadmap.id}
                 milestone={milestone}
                 open={expandedMilestone === milestone.id}
-                completed={completedMilestones.has(milestone.id)}
+                status={milestoneStatuses[milestone.id] ?? "pending"}
                 onToggle={() => {
                   setExpandedMilestone((prev) =>
                     prev === milestone.id ? null : milestone.id,
                   );
                 }}
-                onComplete={(isDone) => {
-                  setCompletedMilestones((prev) => {
-                    const next = new Set(prev);
-                    if (isDone) {
-                      next.add(milestone.id);
-                    } else {
-                      next.delete(milestone.id);
-                    }
-                    return next;
-                  });
+                onStatusChange={async (nextStatus) => {
+                  setMilestoneStatuses((prev) => ({
+                    ...prev,
+                    [milestone.id]: nextStatus,
+                  }));
+
+                  await persistStatus(milestone.id, nextStatus);
                 }}
               />
             ))}

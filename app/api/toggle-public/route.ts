@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid payload." }, { status: 400 });
   }
 
-  const updated = setRoadmapVisibility(body.slug, body.isPublic);
+  const updated = await setRoadmapVisibility(body.slug, body.isPublic);
 
   if (!updated) {
     return NextResponse.json({ error: "Roadmap not found." }, { status: 404 });

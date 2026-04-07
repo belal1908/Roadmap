@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Github, Twitter, Linkedin, Mail } from "lucide-react";
+import { Mail, Share2, Users, Zap } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -93,13 +93,13 @@ export default function Footer() {
             <h4 className="font-bold mb-4">Social</h4>
             <div className="flex gap-4">
               <a href="#" className="hover:text-blue-400">
-                <Github size={20} />
+                <Share2 size={20} />
               </a>
               <a href="#" className="hover:text-blue-400">
-                <Twitter size={20} />
+                <Zap size={20} />
               </a>
               <a href="#" className="hover:text-blue-400">
-                <Linkedin size={20} />
+                <Users size={20} />
               </a>
               <a href="#" className="hover:text-blue-400">
                 <Mail size={20} />

@@ -4,30 +4,34 @@ import { getDashboardRoadmaps } from "@/lib/roadmap-service";
 
 export const dynamic = "force-dynamic";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
   const demoUser = "demo-user";
-  const roadmaps = getDashboardRoadmaps(demoUser);
+  const roadmaps = await getDashboardRoadmaps(demoUser);
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl px-4 py-10 md:px-8">
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-xs uppercase tracking-widest text-cyan-300">
-            Dashboard
-          </p>
-          <h1 className="mt-1 text-3xl font-bold text-slate-100 md:text-4xl">
-            Your Learning Progress
-          </h1>
+    <main className="bg-white min-h-screen">
+      {/* Header */}
+      <div className="border-b border-gray-200 py-8">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900">
+              Your Learning Progress
+            </h1>
+            <p className="mt-2 text-gray-600">Track your roadmap completion</p>
+          </div>
+          <Link
+            href="/"
+            className="rounded-lg bg-blue-600 text-white px-4 py-2 font-semibold hover:bg-blue-700 transition"
+          >
+            + Generate New
+          </Link>
         </div>
-        <Link
-          href="/"
-          className="rounded-lg border border-cyan-500/50 bg-cyan-500/10 px-3 py-2 text-sm text-cyan-200 transition hover:bg-cyan-500/20"
-        >
-          Generate New Roadmap
-        </Link>
       </div>
 
-      <ProgressDashboard roadmaps={roadmaps} />
+      {/* Content */}
+      <div className="max-w-6xl mx-auto px-4 md:px-8 py-12">
+        <ProgressDashboard roadmaps={roadmaps} />
+      </div>
     </main>
   );
 }

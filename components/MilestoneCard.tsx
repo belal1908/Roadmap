@@ -1,105 +1,114 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle2, Circle, CircleDot } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { CheckCircle2, Circle, ExternalLink, SkipForward } from "lucide-react";
+import { useMemo } from "react";
 import JobMarketBadge from "@/components/JobMarketBadge";
-import VideoCard from "@/components/VideoCard";
-import type { Milestone, VideoItem } from "@/types/roadmap";
+import type { Milestone, MilestoneStatus } from "@/types/roadmap";
 
 type Props = {
-  roadmapId: string;
   milestone: Milestone;
   open: boolean;
   onToggle: () => void;
-  completed: boolean;
-  onComplete: (completed: boolean) => void;
+  status: MilestoneStatus;
+  onStatusChange: (status: MilestoneStatus) => void;
 };
 
+const TOOL_LINKS: Record<string, string> = {
+  github: "https://github.com",
+  gitlab: "https://gitlab.com",
+  notion: "https://www.notion.so",
+  figma: "https://www.figma.com",
+  canva: "https://www.canva.com",
+  linkedin: "https://www.linkedin.com",
+  vscode: "https://code.visualstudio.com",
+};
+
+function resolveToolUrl(tool: string): string {
+  const key = tool.toLowerCase();
+  for (const [name, url] of Object.entries(TOOL_LINKS)) {
+    if (key.includes(name)) {
+      return url;
+    }
+  }
+
+  return `https://www.google.com/search?q=${encodeURIComponent(tool)}`;
+}
+
+function resolveResourceUrl(resource: Milestone["resources"][number]): string {
+  if (resource.url) {
+    return resource.url;
+  }
+
+  const parts = [resource.title, resource.platform, resource.author].filter(
+    Boolean,
+  );
+  return `https://www.google.com/search?q=${encodeURIComponent(parts.join(" "))}`;
+}
+
 export default function MilestoneCard({
-  roadmapId,
   milestone,
   open,
   onToggle,
-  completed,
-  onComplete,
+  status,
+  onStatusChange,
 }: Props) {
-  const [videos, setVideos] = useState<VideoItem[] | null>(null);
-  const [loadingVideos, setLoadingVideos] = useState(false);
-
-  useEffect(() => {
-    if (!open || videos) {
-      return;
-    }
-
-    let cancelled = false;
-
-    const run = async () => {
-      setLoadingVideos(true);
-      try {
-        const response = await fetch("/api/fetch-videos", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ query: milestone.youtube_query }),
-        });
-
-        if (!response.ok || cancelled) {
-          return;
-        }
-
-        const payload = (await response.json()) as { videos: VideoItem[] };
-        if (!cancelled) {
-          setVideos(payload.videos);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoadingVideos(false);
-        }
-      }
-    };
-
-    void run();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [milestone.youtube_query, open, videos]);
-
   const statusChip = useMemo(() => {
-    if (completed) {
+    if (status === "done") {
       return {
-        label: "Completed",
+        label: "Done",
         icon: (
-          <CheckCircle2
-            className="h-4 w-4 text-emerald-300"
-            aria-hidden="true"
-          />
+          <CheckCircle2 className="h-4 w-4 text-green-600" aria-hidden="true" />
         ),
-        classes: "border-emerald-400/40 bg-emerald-400/10 text-emerald-200",
+        classes: "border-green-200 bg-green-50 text-green-700",
       };
     }
 
-    if (open) {
+    if (status === "skip") {
       return {
-        label: "In progress",
+        label: "Skipped",
         icon: (
-          <CircleDot className="h-4 w-4 text-amber-300" aria-hidden="true" />
+          <SkipForward className="h-4 w-4 text-amber-600" aria-hidden="true" />
         ),
-        classes: "border-amber-400/40 bg-amber-400/10 text-amber-200",
+        classes: "border-amber-200 bg-amber-50 text-amber-700",
       };
     }
 
     return {
-      label: "Not started",
-      icon: <Circle className="h-4 w-4 text-slate-300" aria-hidden="true" />,
-      classes: "border-slate-500/40 bg-slate-500/10 text-slate-200",
+      label: "Pending",
+      icon: <Circle className="h-4 w-4 text-gray-400" aria-hidden="true" />,
+      classes: "border-gray-200 bg-gray-50 text-gray-600",
     };
-  }, [completed, open]);
+  }, [status]);
+
+  const statusButtons: Array<{ label: string; value: MilestoneStatus }> = [
+    { label: "Pending", value: "pending" },
+    { label: "Done", value: "done" },
+    { label: "Skip", value: "skip" },
+  ];
 
   return (
-    <div className="rounded-2xl border border-slate-700/80 bg-slate-900/55 p-4">
+    <div
+      className="rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md focus-within:ring-2 focus-within:ring-blue-300"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        const key = event.key.toLowerCase();
+        if (key === "d") {
+          event.preventDefault();
+          onStatusChange("done");
+        } else if (key === "p") {
+          event.preventDefault();
+          onStatusChange("pending");
+        } else if (key === "s") {
+          event.preventDefault();
+          onStatusChange("skip");
+        } else if (key === "r") {
+          event.preventDefault();
+          onStatusChange("pending");
+        }
+      }}
+      aria-label={`${milestone.title} milestone`}
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <button
           onClick={onToggle}
@@ -107,10 +116,10 @@ export default function MilestoneCard({
           aria-expanded={open}
           aria-controls={`milestone-${milestone.id}`}
         >
-          <p className="text-sm text-slate-300">
+          <p className="text-xs text-gray-500 uppercase tracking-wide">
             {milestone.id.replaceAll("_", " ")}
           </p>
-          <h4 className="mt-1 text-lg font-semibold text-slate-100">
+          <h4 className="mt-1 text-lg font-semibold text-gray-900">
             {milestone.title}
           </h4>
         </button>
@@ -132,20 +141,20 @@ export default function MilestoneCard({
             transition={{ duration: 0.2 }}
             className="mt-4 space-y-4"
           >
-            <p className="text-sm leading-6 text-slate-300">
+            <p className="text-sm leading-6 text-gray-600">
               {milestone.description}
             </p>
 
             <div className="grid gap-4 md:grid-cols-3">
               <div>
-                <p className="mb-2 text-xs uppercase tracking-wide text-slate-400">
+                <p className="mb-2 text-xs uppercase tracking-wide text-gray-500 font-semibold">
                   Skills
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {milestone.skills.map((skill) => (
                     <span
                       key={skill}
-                      className="rounded-full bg-slate-800 px-2.5 py-1 text-xs text-slate-200"
+                      className="rounded-full bg-blue-50 px-2.5 py-1 text-xs text-blue-700 border border-blue-100"
                     >
                       {skill}
                     </span>
@@ -153,29 +162,43 @@ export default function MilestoneCard({
                 </div>
               </div>
               <div>
-                <p className="mb-2 text-xs uppercase tracking-wide text-slate-400">
+                <p className="mb-2 text-xs uppercase tracking-wide text-gray-500 font-semibold">
                   Tools
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {milestone.tools.map((tool) => (
-                    <span
+                    <a
                       key={tool}
-                      className="rounded-full bg-slate-800 px-2.5 py-1 text-xs text-slate-200"
+                      href={resolveToolUrl(tool)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 rounded-full border border-purple-100 bg-purple-50 px-2.5 py-1 text-xs text-purple-700 hover:border-purple-300"
                     >
                       {tool}
-                    </span>
+                      <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                    </a>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="mb-2 text-xs uppercase tracking-wide text-slate-400">
-                  Resources
+                <p className="mb-2 text-xs uppercase tracking-wide text-gray-500 font-semibold">
+                  Articles & Blogs
                 </p>
-                <ul className="space-y-1 text-sm text-slate-200">
+                <ul className="space-y-1 text-sm text-gray-600">
                   {milestone.resources.map((resource) => (
                     <li key={`${resource.type}:${resource.title}`}>
-                      {resource.title} ·{" "}
-                      <span className="text-slate-400">{resource.type}</span>
+                      <a
+                        href={resolveResourceUrl(resource)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-blue-700 hover:underline"
+                      >
+                        {resource.title}
+                        <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                      </a>{" "}
+                      <span className="text-gray-400 text-xs">
+                        · {resource.type}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -184,43 +207,34 @@ export default function MilestoneCard({
 
             <JobMarketBadge query={milestone.job_skills_query} active={open} />
 
-            <div>
-              <p className="mb-2 text-xs uppercase tracking-wide text-slate-400">
-                Video Lessons
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Status Controls (keyboard: D done, P pending, S skip, R reset)
               </p>
-              {loadingVideos && !videos ? (
-                <p className="text-sm text-slate-300">Loading videos...</p>
-              ) : (
-                <div className="grid gap-3 md:grid-cols-3">
-                  {videos?.map((video) => (
-                    <VideoCard key={video.id} video={video} />
-                  ))}
-                </div>
-              )}
+              <div className="flex flex-wrap gap-2">
+                {statusButtons.map((button) => (
+                  <button
+                    key={button.value}
+                    type="button"
+                    onClick={() => onStatusChange(button.value)}
+                    className={`rounded-lg border px-3 py-2 text-sm font-medium transition ${
+                      status === button.value
+                        ? "border-blue-600 bg-blue-600 text-white"
+                        : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+                    }`}
+                  >
+                    {button.label}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => onStatusChange("pending")}
+                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-400"
+                >
+                  Reset
+                </button>
+              </div>
             </div>
-
-            <button
-              type="button"
-              onClick={async () => {
-                const nextCompleted = !completed;
-                onComplete(nextCompleted);
-
-                await fetch("/api/progress", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    roadmapId,
-                    milestoneId: milestone.id,
-                    completed: nextCompleted,
-                  }),
-                });
-              }}
-              className="inline-flex rounded-lg bg-emerald-500 px-3 py-2 text-sm font-medium text-slate-950 transition hover:bg-emerald-400"
-            >
-              {completed ? "Mark as Incomplete" : "Mark as Complete"}
-            </button>
           </motion.div>
         ) : null}
       </AnimatePresence>

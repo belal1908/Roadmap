@@ -8,10 +8,15 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get("category") ?? undefined;
 
+  const [trending, roadmaps] = await Promise.all([
+    listTrendingRoadmaps(),
+    listPublicRoadmaps(category),
+  ]);
+
   return NextResponse.json(
     {
-      trending: listTrendingRoadmaps(),
-      roadmaps: listPublicRoadmaps(category),
+      trending,
+      roadmaps,
     },
     { status: 200 },
   );

@@ -67,23 +67,23 @@ export default function SearchBar({
         Search topic
       </label>
       <div
-        className={`group flex w-full items-center gap-3 rounded-2xl border border-slate-700 bg-slate-900/70 px-4 ring-1 ring-transparent transition focus-within:border-cyan-400/50 focus-within:ring-cyan-400/30 ${
+        className={`group flex w-full items-center gap-3 rounded-lg border border-gray-300 bg-white px-4 ring-1 ring-transparent transition focus-within:border-blue-500 focus-within:ring-blue-500 focus-within:ring-opacity-20 ${
           compact ? "h-12" : "h-14"
         }`}
       >
-        <Search className="h-4 w-4 text-cyan-300" aria-hidden="true" />
+        <Search className="h-4 w-4 text-gray-400" aria-hidden="true" />
         <input
           id="roadmap-query"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={placeholder}
-          className="h-full w-full bg-transparent text-sm text-slate-100 placeholder:text-slate-400 outline-none"
+          className="h-full w-full bg-transparent text-sm text-gray-900 placeholder:text-gray-400 outline-none"
           aria-label="Search for a roadmap topic"
         />
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex h-9 items-center rounded-xl bg-cyan-500 px-4 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-70"
+          className="inline-flex h-9 items-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -92,7 +92,7 @@ export default function SearchBar({
           )}
         </button>
       </div>
-      {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+      {error ? <p className="text-sm text-red-600">{error}</p> : null}
     </form>
   );
 }
